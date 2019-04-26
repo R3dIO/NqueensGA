@@ -123,10 +123,10 @@ def convergence(population):
 
 def main():
 	#Assign initial parameter
-	population_size = 12
-	num_queens = 5
-	pool_size = 6
-	generation_num = 10
+	num_queens = int(input("Enter the number of queens : ") or "5")
+	population_size = int(input("Enter the population size : ") or "12")
+	pool_size = int(input("Enter the mating pool size : ") or "6")
+	generation_num = int(input("Enter the total number of Generations : ") or "10")
 	#Generate & print initial population
 	population = intial_population(population_size, num_queens)
 	print('population');print_population(population);
