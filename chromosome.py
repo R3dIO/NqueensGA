@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from operator import itemgetter
 
 class Chromosome:
@@ -17,6 +18,22 @@ class Chromosome:
 
 	def __str__(self):
 		return ("[(X: {self.x} Y: {self.y}),(L: {self.l} R: {self.r})]".format(self = self))
+
+def print_population(population):
+	for solution in population:
+		for individual_solution in solution:
+			print(str(individual_solution), end = ' ')
+		print()
+
+def print_matrix(population, num_queens):
+	board = [[0 for x in range(num_queens)] for y in range(num_queens)]
+	for individual in population:
+		for gene in individual:
+			if not isinstance(gene,int):
+				board[gene.x-1][gene.y-1] = 'X'
+		print(np.matrix(board))
+		board = [[0 for x in range(num_queens)] for y in range(num_queens)]
+	print()	
 
 def intial_population(population_size, num_queens):
 	population = []
@@ -88,20 +105,43 @@ def crossover(mating_pool,num_queens,pool_size,population_size):
 		population.append(kid)
 	return	population
 
-def print_population(population):
-	for solution in population:
-		for individual_solution in solution:
-			print(str(individual_solution), end = ' ')
-		print()
+def mutation(population, num_queens, population_size):
+	mutation_prob = random.uniform(0,1)
+	if (mutation_prob < 0.1):
+		mutant = random.randint(0,population_size-1)
+		powers = random.randint(0,num_queens-1)
+		individual = population[mutant][powers]
+		individual.x,individual.y = individual.y,individual.x
+		return True
+	else:
+		return False
+
+def convergence(population):
+	for individual in population:
+		if individual[-1] == 0:
+			return True
 
 def main():
+	#Assign initial parameter
 	population_size = 12
 	num_queens = 5
 	pool_size = 6
+	generation_num = 10
+	#Generate & print initial population
 	population = intial_population(population_size, num_queens)
-	mating_pool = selection(population, pool_size)
-	next_gen = assign_fitness(crossover(mating_pool,num_queens,pool_size,population_size))
-	print('population');print_population(population);print('\nmating pool');print_population(mating_pool);print('\nnext gen');print_population(next_gen)
+	print('population');print_population(population);
+	#Generate & print next population
+	for index in range( generation_num ):
+		mating_pool = selection(population, pool_size)
+		next_gen = assign_fitness(crossover(mating_pool,num_queens,pool_size,population_size))
+
+		print("Mutation status {}".format(mutation(population,num_queens,population_size)))
+		print('\nmating pool');print_population(mating_pool);print('\nnext gen');print_population(next_gen)
+		print("Generation number :",index+1)
+		print_matrix(next_gen, num_queens)
+
+		if convergence(next_gen): break
+		population = next_gen
 
 if __name__ == '__main__':
 		main()
