@@ -1,6 +1,6 @@
-import random
-import numpy as np
-from operator import itemgetter
+from fitness import *
+from selection import *
+from mutation import *
 
 class Chromosome:
 
@@ -33,6 +33,7 @@ def print_matrix(population, num_queens):
 			if not isinstance(gene,int):
 				board[gene.x-1][gene.y-1] = 'X'
 		print(np.matrix(board))
+		print()
 		board = [[0 for x in range(num_queens)] for y in range(num_queens)]
 	print()
 
@@ -47,53 +48,6 @@ def intial_population(population_size, num_queens):
 		population.append(individual)
 	return population
 
-def fitness(individual):
-	conflicts = 0
-	for i in range(len(individual)):
-		for j in range(i):
-			if (individual[i].x == individual[j].x):
-				conflicts += 1
-			if (individual[i].y == individual[j].y):
-				conflicts += 1
-			if ( abs(individual[i].x - individual[j].x)	== abs(individual[i].y - individual[j].y) ):
-				conflicts += 1
-	individual.append(conflicts)
-	return individual
-	#print(individual[j], end=" ")
-
-def assign_fitness(population):
-	for index in range(len(population)):
-		population[index] = fitness(population[index])
-	return population
-
-def selection_roulette_wheel(population, pool_size):
-	cumulative_fitness = 0
-	norm_population = []
-	mating_pool = []
-	for index in range(len(population)):
-		cumulative_fitness = cumulative_fitness + population[index][-1]
-
-	for index in range(len(population)):
-		fitness =  (population[index][-1]/cumulative_fitness)
-		if index == 0 :
-			norm_population.append( fitness )
-		else :
-			norm_population.append( fitness + norm_population[index-1])
-
-	for index in range(pool_size):
-		pointer = random.uniform(0,1) #;print(pointer) ;print(norm_population)
-		for itr in range(len(norm_population)):
-			if pointer > norm_population[itr-1] and pointer < norm_population[itr] :
-				mating_pool.append(population[itr])
-				break # ;print( mating_pool)
-	return mating_pool
-
-def selection(population,pool_size):
-	ordered_population = sorted(population, key=itemgetter(-1))
-	ordered_population = ordered_population[:pool_size]
-	return ordered_population
-	# print_population(ordered_population)
-
 def crossover(mating_pool,num_queens,pool_size,population_size):
 	population = []
 	while len(population) != population_size:
@@ -106,22 +60,6 @@ def crossover(mating_pool,num_queens,pool_size,population_size):
 		population.append(kid)
 	return	population
 
-def mutation(population, num_queens, population_size, mutation_rate):
-	mutant = np.argmax(list(map(itemgetter(-1), population)))
-	for gene in range(len(population[mutant])-1):
-	 for ngene in range(gene,len(population[mutant])-1):
-	 	if (population[mutant][gene].x == population[mutant][ngene].x) or (population[mutant][gene].y == population[mutant][ngene].y):
-	 		powers = gene
-	 		break
-	 	break
-	mutation_prob = random.uniform(0,1)
-	if (mutation_prob < mutation_rate):
-		individual = population[mutant][powers]
-		individual.x,individual.y = individual.y,individual.x
-		return True
-	else:
-		return False
-
 def convergence(population):
 	for individual in population:
 		if individual[-1] == 0:
@@ -132,8 +70,8 @@ def main():
 	num_queens = int(input("Enter the number of queens : ") or "5")
 	population_size = int(input("Enter the population size : ") or "12")
 	pool_size = int(input("Enter the mating pool size : ") or "6")
-	mutation_rate = float(input("Enter the mutation rate : ") or "0.1")
-	num_generation = int(input("Enter the total number of Generations : ") or "10")
+	mutation_rate = float(input("Enter the mutation rate : ") or "0.2")
+	num_generation = int(input("Enter the total number of Generations : ") or "20")
 	#Generate & print initial population
 	population = intial_population(population_size, num_queens)
 	print('population');print_population(population);print_matrix(population,num_queens)
